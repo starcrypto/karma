@@ -240,7 +240,7 @@ webhooks.on([
     sendTransaction(rawTransaction, (txHash) => {
         const comment = `Hi @${userLogin},
         
-Well done! ${amount} BBG has been sent to your polygon wallet. Please check the following tx:
+Well done! ${karma} BBG has been sent to your polygon wallet. Please check the following tx:
 
 <https://polygonscan.com/tx/${txHash}>
 

@@ -307,8 +307,6 @@ webhooks.on([
     "pull_request.reopened",
     "pull_request.synchronize"
 ], async ({id, name, payload}) => {
-    console.log(name, id, payload);
-
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
 
@@ -320,7 +318,6 @@ webhooks.on([
     const response = await fetch(diffUrl);
     const diffText = await response.text();
     const diffs = parseDiff(diffText);
-    console.log(diffs);
 
     const karma = calculateKarma(payload.pull_request, diffs)
     const comment = `Karma: this pull request may get karma: ${karma} BBG`

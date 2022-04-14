@@ -16,6 +16,8 @@ const webhooks = new Webhooks({
     secret: process.env.GITHUB_WEBHOOK_SECRET
 });
 
+const polygonAddressRE = /polygon:(0x[a-fA-F0-9]{40}$)/;
+
 webhooks.onAny(({id, name, payload}) => {
     console.log(name, "event received");
 });
@@ -25,18 +27,51 @@ webhooks.on([
     "issue_comment.edited",
 ], ({id, name, payload}) => {
 
+    const issueNumber = payload.number;
+    const issueOwner = payload.issue.user.login;
+    const commentOwner = payload.comment.user.login;
+    if (issueOwner != commentOwner) {
+        return
+    }
+
+    // check the address format
+    const matched = polygonAddressRE.exec(payload.comment.body)
+    if (matched) {
+        const address = matched[1];
+        console.log("matched address", address);
+
+
+    } else {
+        const comment = `Hi @${userLogin},
+    
+You left an invalid address format, please write your address with the following format:
+ 
+        polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
+      
+`
+        const resp = octokit.rest.issues.createComment({
+            owner: payload.repository.owner.login,
+            repo: payload.repository.name,
+            issue_number: issueNumber,
+            body: comment,
+        });
+        console.log(resp);
+
+    }
 })
 
 webhooks.on([
     "pull_request.opened"
 ], ({id, name, payload}) => {
     const issueNumber = payload.number;
+
     const userLogin = payload.pull_request.user.login;
-    const owner = payload.pull_request.base.user
-    const baseRepo = payload.pull_request.base.repo
+    const baseOwner = payload.repository.owner.login;
+    const baseRepo = payload.repository.name;
 
     const comment = `Hi @${userLogin},
-To receive BBG token, please left your polygon address in the following format, e.g.,
+    
+To receive BBG token, please left your polygon address as an issue comment in this pull request with the following format, e.g.,
  
         polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
       
@@ -44,10 +79,10 @@ Once this pull request is merged, your BBG token will be sent to your wallet.
 `
 
     const resp = octokit.rest.issues.createComment({
-        owner,
-        baseRepo,
-        issueNumber,
-        comment,
+        owner: baseOwner,
+        repo: baseRepo,
+        issue_number: issueNumber,
+        body: comment,
     });
     console.log(resp);
 })

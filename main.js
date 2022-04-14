@@ -112,6 +112,8 @@ const calculateKarma = (pullRequest, diffs) => {
     let karma = baseKarma;
     karma += chunkKarma * diffs.length
     karma = diffs.reduce((prev, cur) => prev + (lineKarma + Math.abs(cur.additions - cur.deletions)), karma)
+    karma += 10 * pullRequest.comments
+    karma += 20 * pullRequest.review_comments
     return karma
 }
 

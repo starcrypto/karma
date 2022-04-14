@@ -1,5 +1,7 @@
 require('dotenv').config()
 
+const Web3 = require('web3');
+
 const fetch = require('node-fetch');
 
 const parseDiff = require('parse-diff');

@@ -42,7 +42,7 @@ webhooks.on([
 
 
     } else {
-        const comment = `Hi @${userLogin},
+        const comment = `Hi @${issueOwner},
     
 You left an invalid address format, please write your address with the following format:
  

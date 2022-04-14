@@ -13,11 +13,42 @@ const {Webhooks, createNodeMiddleware} = require("@octokit/webhooks");
 
 const {ERC20PresetMinterPauser} = require("./abi/ERC20PresetMinterPauser");
 
-const { MongoClient } = require('mongodb');
+const {MongoClient} = require('mongodb');
+const EventSource = require("eventsource");
 
 // const { ethers } = require("ethers");
 // const ethersPolygonHttpProvider = new ethers.providers.JsonRpcProvider(polygonRPCUrl);
 // const signer = ethersPolygonHttpProvider.getSigner();
+
+const mongoURL = process.env.MONGO_URL
+const mongoDbName = "karma";
+const mongoClient = new MongoClient(mongoURL);
+
+
+const db = mongoClient.db(mongoDbName);
+const contributors = db.collection('contributor');
+
+
+const insertContributor = async (login, address) => {
+    const insertResult = await contributors.insertOne({
+        login: login,
+        addresses: {
+            polygon: address,
+        }
+    });
+    console.log('inserted contributor', insertResult);
+    return insertResult;
+}
+
+const findContributor = async (login) => {
+    const result = await contributors.find({login}).toArray();
+    if (result.length == 0) {
+        return null
+    }
+
+    return result[0]
+};
+
 
 const polygonRPCUrl = "https://polygon-rpc.com";
 const polygonHttpProvider = new Web3.providers.HttpProvider(polygonRPCUrl);
@@ -27,10 +58,7 @@ const web3 = new Web3(polygonHttpProvider);
 const ownerAddress = process.env.CONTRACT_OWNER_ADDRESS;
 const contractAddress = process.env.CONTRACT_ADDRESS;
 const privateKey = process.env.PRIVATE_KEY;
-
-
 const tokenContract = new web3.eth.Contract(ERC20PresetMinterPauser.abi, contractAddress, {from: ownerAddress});
-
 
 const signTransaction = async (tokenContract, fromPrivateKey, toAddress, balance) => {
     const encodedTransferABI = tokenContract.methods.transfer(toAddress, balance).encodeABI();
@@ -74,8 +102,15 @@ const sendTransaction = (rawTransaction) => {
         });
 }
 
-const calculateKarma = (pullRequest, diffs) => {
+const baseKarma = 50;
+const lineKarma = 2;
+const chunkKarma = 2;
 
+const calculateKarma = (pullRequest, diffs) => {
+    let karma = baseKarma;
+    karma += chunkKarma * diffs.length
+    karma = diffs.reduce((prev, cur) => prev + (lineKarma + Math.abs(cur.additions - cur.deletions)), karma)
+    return karma
 }
 
 const sendTest = async () => {
@@ -111,7 +146,7 @@ const webhooks = new Webhooks({
     secret: process.env.GITHUB_WEBHOOK_SECRET
 });
 
-const polygonAddressRE = /polygon:(0x[a-fA-F0-9]{40}$)/;
+const polygonAddressRE = /polygon:(0x[a-fA-F0-9]{40}$)/g;
 
 webhooks.onAny(({id, name, payload}) => {
     console.log(name, "event received");
@@ -122,10 +157,15 @@ webhooks.on([
     "issue_comment.edited",
 ], ({id, name, payload}) => {
 
-    const issueNumber = payload.number;
+    const issueNumber = payload.issue.number;
     const issueOwner = payload.issue.user.login;
     const commentOwner = payload.comment.user.login;
     if (issueOwner != commentOwner) {
+        return
+    }
+
+    // ignore issues that is not a pull request
+    if (!payload.issue.pull_request) {
         return
     }
 
@@ -135,6 +175,17 @@ webhooks.on([
         const address = matched[1];
         console.log("matched address", address);
 
+        const inserted = insertContributor(issueOwner, address);
+        console.log("inserted contributor", inserted)
+
+        const comment = `Great! @${issueOwner}, I've memorized your address.`
+        const resp = octokit.rest.issues.createComment({
+            owner: payload.repository.owner.login,
+            repo: payload.repository.name,
+            issue_number: issueNumber,
+            body: comment,
+        });
+        console.log(resp);
 
     } else {
         const comment = `Hi @${issueOwner},
@@ -185,10 +236,12 @@ Once this pull request is merged, your BBG token will be sent to your wallet.
 webhooks.on([
     "pull_request.opened",
     "pull_request.reopened",
-    "pull_request.synchronize",
-    "pull_request.closed"
+    "pull_request.synchronize"
 ], async ({id, name, payload}) => {
     console.log(name, id, payload);
+
+    const baseOwner = payload.repository.owner.login;
+    const baseRepo = payload.repository.name;
 
     const userLogin = payload.pull_request.user.login;
     const diffUrl = payload.pull_request.diff_url;
@@ -197,27 +250,41 @@ webhooks.on([
 
     const response = await fetch(diffUrl);
     const diffText = await response.text();
-    const files = parseDiff(diffText);
-    console.log(files);
+    const diffs = parseDiff(diffText);
+    console.log(diffs);
 
-
+    const karma = calculateKarma(payload.pull_request, diffs)
+    const comment = `Karma: this pull request may get karma: ${karma} BBG`
+    const resp = octokit.rest.issues.createComment({
+        owner: baseOwner,
+        repo: baseRepo,
+        issue_number: issueNumber,
+        body: comment,
+    });
+    console.log(resp);
 });
 
 
-// proxy
-const EventSource = require('eventsource')
-const webhookProxyUrl = "https://smee.io/sTg2t0azYcNNu5H1"; // replace with your own Webhook Proxy URL
-const source = new EventSource(webhookProxyUrl);
-source.onmessage = (event) => {
-    const webhookEvent = JSON.parse(event.data);
-    webhooks
-        .verifyAndReceive({
-            id: webhookEvent["x-request-id"],
-            name: webhookEvent["x-github-event"],
-            signature: webhookEvent["x-hub-signature"],
-            payload: webhookEvent.body,
-        })
-        .catch(console.error);
+const main = async () => {
+    console.log("connecting mongodb...")
+    await mongoClient.connect();
+
+    // proxy
+    const EventSource = require('eventsource')
+    const webhookProxyUrl = "https://smee.io/sTg2t0azYcNNu5H1"; // replace with your own Webhook Proxy URL
+    const source = new EventSource(webhookProxyUrl);
+    source.onmessage = (event) => {
+        const webhookEvent = JSON.parse(event.data);
+        webhooks
+            .verifyAndReceive({
+                id: webhookEvent["x-request-id"],
+                name: webhookEvent["x-github-event"],
+                signature: webhookEvent["x-hub-signature"],
+                payload: webhookEvent.body,
+            })
+            .catch(console.error);
+    };
 };
+main();
 
 require("http").createServer(createNodeMiddleware(webhooks)).listen(3301);

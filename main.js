@@ -107,13 +107,14 @@ const sendTransaction = (rawTransaction, txHashHandler) => {
 const baseKarma = 100;
 const lineKarma = 1;
 const chunkKarma = 2;
+const reviewKarma = 100;
 
 const calculateKarma = (pullRequest, diffs) => {
     let karma = baseKarma;
     karma += chunkKarma * diffs.length
     karma = diffs.reduce((prev, cur) => prev + (lineKarma + Math.abs(cur.additions - cur.deletions)), karma)
-    karma += 10 * pullRequest.comments
-    karma += 20 * pullRequest.review_comments
+    karma += 10 * pullRequest.comments.length
+    karma += reviewKarma * pullRequest.review_comments.length
     return karma
 }
 

@@ -1,5 +1,7 @@
 require('dotenv').config()
 
+const fetch = require('node-fetch');
+
 const parseDiff = require('parse-diff');
 
 const { Webhooks, createNodeMiddleware } = require("@octokit/webhooks");

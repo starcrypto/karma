@@ -26,8 +26,6 @@ const ownerAddress = process.env.CONTRACT_OWNER_ADDRESS;
 const contractAddress = process.env.CONTRACT_ADDRESS;
 const privateKey = process.env.PRIVATE_KEY;
 
-// for testing (vitalik address)
-const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
 
 const tokenContract = new web3.eth.Contract(ERC20PresetMinterPauser.abi, contractAddress, {from: ownerAddress});
 
@@ -74,14 +72,18 @@ const sendTransaction = (rawTransaction) => {
         });
 }
 
-const sendMain = async () => {
-    const totalBalance = await tokenContract.methods.balanceOf(ownerAddress).call();
-    console.log("BBG", totalBalance);
+const sendTest = async () => {
+    // const totalBalance = await tokenContract.methods.balanceOf(ownerAddress).call();
+    // console.log("BBG", totalBalance);
+    
+    // for testing (vitalik address)
+    const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
     const amount = web3.utils.toWei('1000');
     const rawTransaction = await signTransaction(tokenContract, privateKey, recipientAddress, amount);
     sendTransaction(rawTransaction);
 };
-sendMain();
+
+// sendTest();
 
 /*
 const createTransaction = await web3.eth.accounts.signTransaction(

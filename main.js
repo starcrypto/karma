@@ -1,6 +1,8 @@
 require('dotenv').config()
 console.log(process.env)
 
+const parseDiff = require('parse-diff');
+
 const { Webhooks, createNodeMiddleware } = require("@octokit/webhooks");
 const webhooks = new Webhooks({
   secret: process.env.GITHUB_WEBHOOK_SECRET
@@ -11,7 +13,14 @@ webhooks.onAny(({ id, name, payload }) => {
 });
 
 webhooks.on("pull_request.opened", (payload) => {
-    console.log(payload);
+    console.log("pull_request.opened", payload);
+    let userLogin = payload.pull_request.user.login;
+    let diffUrl = payload.pull_request.diff_url;
+    let pullRequestNo = payload.number;
+    let state = payload.pull_request.state;
+
+    let diff = ''; // input diff string
+    let files = parseDiff(diff);
 });
 
 

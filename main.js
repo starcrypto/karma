@@ -16,9 +16,8 @@ webhooks.on([
     "pull_request.reopened",
     "pull_request.synchronize",
     "pull_request.closed"
-], async (payload) => {
-
-    console.log("pull_request event", payload);
+], async ({id, name, payload}) => {
+    console.log(name, id, payload);
 
     const userLogin = payload.pull_request.user.login;
     const diffUrl = payload.pull_request.diff_url;

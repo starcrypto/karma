@@ -88,22 +88,25 @@ const signTransaction = async (tokenContract, fromPrivateKey, toAddress, balance
     return signTransactionOutput.rawTransaction;
 };
 
-const sendTransaction = (rawTransaction) => {
+const sendTransaction = (rawTransaction, txHashHandler) => {
     return web3.eth.sendSignedTransaction(
         rawTransaction
     ).once('transactionHash', (function (hash) {
         console.log(`tx hash: ${hash}`)
+        if (txHashHandler) {
+            txHashHandler(hash)
+        }
     }))
         .on('confirmation', function (confNumber, receipt) {
-            console.log(`Confirmation: ${confNumber}`);
+            console.log(`confirmation: ${confNumber}`);
         })
         .on('error', async function (error) {
             console.log('something went wrong...', error);
         });
 }
 
-const baseKarma = 50;
-const lineKarma = 2;
+const baseKarma = 100;
+const lineKarma = 1;
 const chunkKarma = 2;
 
 const calculateKarma = (pullRequest, diffs) => {
@@ -121,7 +124,9 @@ const sendTest = async () => {
     const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
     const amount = web3.utils.toWei('1000');
     const rawTransaction = await signTransaction(tokenContract, privateKey, recipientAddress, amount);
-    sendTransaction(rawTransaction);
+    sendTransaction(rawTransaction, (txHash) => {
+
+    });
 };
 
 // sendTest();
@@ -205,6 +210,50 @@ You left an invalid address format, please write your address with the following
 
     }
 })
+
+
+webhooks.on([
+    "pull_request.closed"
+], async ({id, name, payload}) => {
+    const issueNumber = payload.number;
+
+    const userLogin = payload.pull_request.user.login;
+    const baseOwner = payload.repository.owner.login;
+    const baseRepo = payload.repository.name;
+
+    const contributor = findContributor(userLogin)
+    if (!contributor) {
+        return
+    }
+
+    console.log("found contributor", contributor)
+
+    const response = await fetch(diffUrl);
+    const diffText = await response.text();
+    const diffs = parseDiff(diffText);
+    console.log(diffs);
+
+    const karma = calculateKarma(payload.pull_request, diffs)
+    const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
+    const amount = web3.utils.toWei(karma.toString());
+    const rawTransaction = await signTransaction(tokenContract, privateKey, recipientAddress, amount);
+    sendTransaction(rawTransaction, (txHash) => {
+        const comment = `Hi @${userLogin}, ${amount} BBG has been sent to your polygon wallet. Please check the following tx:
+
+        ${txHash}
+
+Thank you for your contribution! 
+`
+        const resp = octokit.rest.issues.createComment({
+            owner: baseOwner,
+            repo: baseRepo,
+            issue_number: issueNumber,
+            body: comment,
+        });
+        console.log(resp);
+    });
+})
+
 
 webhooks.on([
     "pull_request.opened"

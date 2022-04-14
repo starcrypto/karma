@@ -60,6 +60,7 @@ apps: [
     name: '${appName}',
     script: '${shipit.releasePath}/main.js',
     watch: true,
+    cwd: '${shipit.releasePath}',
     autorestart: true,
     restart_delay: 1000,
     env: {

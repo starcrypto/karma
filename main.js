@@ -288,7 +288,9 @@ webhooks.on([
     
 To receive BBG token, please left your polygon address as an issue comment in this pull request with the following format, e.g.,
  
-        polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
+\`\`\`
+polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
+\`\`\`
       
 Once this pull request is merged, your BBG token will be sent to your wallet.
 `

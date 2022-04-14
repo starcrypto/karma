@@ -1,4 +1,4 @@
-
+BBGO Karma Bot - BBG token distribution automation
 
 # Requirement
 

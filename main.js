@@ -1,5 +1,4 @@
 require('dotenv').config()
-console.log(process.env)
 
 const parseDiff = require('parse-diff');
 
@@ -12,15 +11,24 @@ webhooks.onAny(({ id, name, payload }) => {
     console.log(name, "event received");
 });
 
-webhooks.on("pull_request.opened", (payload) => {
-    console.log("pull_request.opened", payload);
-    let userLogin = payload.pull_request.user.login;
-    let diffUrl = payload.pull_request.diff_url;
-    let pullRequestNo = payload.number;
-    let state = payload.pull_request.state;
+webhooks.on([
+    "pull_request.opened",
+    "pull_request.reopened",
+    "pull_request.synchronize",
+    "pull_request.closed"
+], async (payload) => {
 
-    let diff = ''; // input diff string
-    let files = parseDiff(diff);
+    console.log("pull_request event", payload);
+
+    const userLogin = payload.pull_request.user.login;
+    const diffUrl = payload.pull_request.diff_url;
+    const pullRequestNo = payload.number;
+    const state = payload.pull_request.state;
+
+    const response = await fetch(diffUrl);
+    const diffText = await response.text();
+    const files = parseDiff(diffText);
+    console.log(files);
 });
 
 

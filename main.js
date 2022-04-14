@@ -238,12 +238,15 @@ webhooks.on([
     const amount = web3.utils.toWei(karma.toString());
     const rawTransaction = await signTransaction(tokenContract, privateKey, recipientAddress, amount);
     sendTransaction(rawTransaction, (txHash) => {
-        const comment = `Hi @${userLogin}, ${amount} BBG has been sent to your polygon wallet. Please check the following tx:
+        const comment = `Hi @${userLogin},
+        
+Well done! ${amount} BBG has been sent to your polygon wallet. Please check the following tx:
 
-        ${txHash}
+<https://polygonscan.com/tx/${txHash}>
 
 Thank you for your contribution! 
 `
+       
         const resp = octokit.rest.issues.createComment({
             owner: baseOwner,
             repo: baseRepo,

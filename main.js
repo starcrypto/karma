@@ -240,7 +240,7 @@ webhooks.on([
     sendTransaction(rawTransaction, (txHash) => {
         const comment = `Hi @${userLogin},
         
-Well done! ${amount} BBG has been sent to your polygon wallet. Please check the following tx:
+Well done! ${karma} BBG has been sent to your polygon wallet. Please check the following tx:
 
 <https://polygonscan.com/tx/${txHash}>
 
@@ -266,8 +266,19 @@ webhooks.on([
     const userLogin = payload.pull_request.user.login;
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
+    const contributor = findContributor(userLogin)
 
-    const comment = `Hi @${userLogin},
+    if (contributor) {
+        const comment = `Welcome back! @${userLogin}`
+        const resp = octokit.rest.issues.createComment({
+            owner: baseOwner,
+            repo: baseRepo,
+            issue_number: issueNumber,
+            body: comment,
+        });
+        console.log(resp);
+    } else {
+        const comment = `Hi @${userLogin},
     
 To receive BBG token, please left your polygon address as an issue comment in this pull request with the following format, e.g.,
  
@@ -276,13 +287,15 @@ To receive BBG token, please left your polygon address as an issue comment in th
 Once this pull request is merged, your BBG token will be sent to your wallet.
 `
 
-    const resp = octokit.rest.issues.createComment({
-        owner: baseOwner,
-        repo: baseRepo,
-        issue_number: issueNumber,
-        body: comment,
-    });
-    console.log(resp);
+        const resp = octokit.rest.issues.createComment({
+            owner: baseOwner,
+            repo: baseRepo,
+            issue_number: issueNumber,
+            body: comment,
+        });
+        console.log(resp);
+    }
+
 })
 
 webhooks.on([

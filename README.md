@@ -36,3 +36,15 @@ DEPLOY_HOME=/home/karma
 ```shell
 npx shipit production deploy
 ```
+
+# Reference
+
+- How To Automate Your Node.js Production Deployments with Shipit on CentOS 7 <https://www.digitalocean.com/community/tutorials/how-to-automate-your-node-js-production-deployments-with-shipit-on-centos-7>
+- Deploying a NodeJS Application Using GitHub Actions <https://medium.com/@g.c.dassanayake/deploying-a-nodejs-application-using-github-actions-e5f4bde7b21b>
+- Ethereum JavaScript Libraries: web3.js vs. ethers.js (Part II) <https://blog.infura.io/ethereum-javascript-libraries-web3-js-vs-ethers-js-part-ii>
+- Using the Ethereum Web3 Library to Send Transactions on Moonbeam <https://medium.com/moonbeam-network/using-the-ethereum-web3-library-to-send-transactions-in-moonbeam-5b8593767904>
+- GitHub OAuth Login with Node.js <http://thecodebarbarian.com/github-oauth-login-with-node-js.html>
+- octokit/rest.js <https://octokit.github.io/rest.js/v18>
+- octokit/webhooks <https://github.com/octokit/webhooks.js/#local-development>
+- smee.io <https://smee.io/>
+

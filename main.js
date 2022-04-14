@@ -13,6 +13,8 @@ const {Webhooks, createNodeMiddleware} = require("@octokit/webhooks");
 
 const {ERC20PresetMinterPauser} = require("./abi/ERC20PresetMinterPauser");
 
+const { MongoClient } = require('mongodb');
+
 // const { ethers } = require("ethers");
 // const ethersPolygonHttpProvider = new ethers.providers.JsonRpcProvider(polygonRPCUrl);
 // const signer = ethersPolygonHttpProvider.getSigner();
@@ -72,10 +74,14 @@ const sendTransaction = (rawTransaction) => {
         });
 }
 
+const calculateKarma = (pullRequest, diffs) => {
+
+}
+
 const sendTest = async () => {
     // const totalBalance = await tokenContract.methods.balanceOf(ownerAddress).call();
     // console.log("BBG", totalBalance);
-    
+
     // for testing (vitalik address)
     const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
     const amount = web3.utils.toWei('1000');

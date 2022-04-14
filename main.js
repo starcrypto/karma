@@ -2,7 +2,6 @@ require('dotenv').config()
 
 const Web3 = require('web3');
 
-
 const fetch = require('node-fetch');
 
 const parseDiff = require('parse-diff');
@@ -320,23 +319,25 @@ webhooks.on([
 const main = async () => {
     console.log("connecting mongodb...")
     await mongoClient.connect();
+    console.log("mongodb connected")
 
-    // proxy
-    const EventSource = require('eventsource')
-    const webhookProxyUrl = "https://smee.io/sTg2t0azYcNNu5H1"; // replace with your own Webhook Proxy URL
-    const source = new EventSource(webhookProxyUrl);
-    source.onmessage = (event) => {
-        const webhookEvent = JSON.parse(event.data);
-        webhooks
-            .verifyAndReceive({
-                id: webhookEvent["x-request-id"],
-                name: webhookEvent["x-github-event"],
-                signature: webhookEvent["x-hub-signature"],
-                payload: webhookEvent.body,
-            })
-            .catch(console.error);
-    };
+    if (process.env.DEV_PROXY) {
+        console.log("starting event proxy...")
+        const EventSource = require('eventsource')
+        const webhookProxyUrl = process.env.DEV_PROXY; // replace with your own Webhook Proxy URL
+        const source = new EventSource(webhookProxyUrl);
+        source.onmessage = (event) => {
+            const webhookEvent = JSON.parse(event.data);
+            webhooks
+                .verifyAndReceive({
+                    id: webhookEvent["x-request-id"],
+                    name: webhookEvent["x-github-event"],
+                    signature: webhookEvent["x-hub-signature"],
+                    payload: webhookEvent.body,
+                })
+                .catch(console.error);
+        };
+    }
+    require("http").createServer(createNodeMiddleware(webhooks)).listen(3301);
 };
 main();
-
-require("http").createServer(createNodeMiddleware(webhooks)).listen(3301);

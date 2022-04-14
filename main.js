@@ -220,6 +220,11 @@ webhooks.on([
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
 
+    // ignore unmerged pull requests
+    if (!payload.pull_request.merged) {
+        return
+    }
+
     const contributor = findContributor(userLogin)
     if (!contributor) {
         return

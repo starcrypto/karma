@@ -228,7 +228,7 @@ webhooks.on([
 
     console.log("found contributor", contributor)
 
-    const response = await fetch(diffUrl);
+    const response = await fetch(payload.pull_request.diff_url);
     const diffText = await response.text();
     const diffs = parseDiff(diffText);
     console.log(diffs);
@@ -246,7 +246,7 @@ Well done! ${amount} BBG has been sent to your polygon wallet. Please check the 
 
 Thank you for your contribution! 
 `
-       
+
         const resp = octokit.rest.issues.createComment({
             owner: baseOwner,
             repo: baseRepo,

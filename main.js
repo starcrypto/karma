@@ -1,13 +1,16 @@
+require('dotenv').config()
+console.log(process.env)
+
 const { Webhooks, createNodeMiddleware } = require("@octokit/webhooks");
 const webhooks = new Webhooks({
-  secret: "bbgotothem00n",
+  secret: process.env.GITHUB_WEBHOOK_SECRET
 });
 
 webhooks.onAny(({ id, name, payload }) => {
     console.log(name, "event received");
 });
 
-webhooks.on("pull_requests.opened", (payload) => {
+webhooks.on("pull_request.opened", (payload) => {
     console.log(payload);
 });
 

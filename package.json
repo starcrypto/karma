@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@octokit/webhooks": "^9.23.0",
+    "dotenv": "^16.0.0",
     "eventsource": "^2.0.0"
   }
 }

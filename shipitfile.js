@@ -19,6 +19,7 @@ module.exports = shipit => {
         default: {
             deployTo: deployHome,
             repositoryUrl: 'https://github.com/starcrypto/karma.git',
+            branch: 'main',
             keepReleases: 5,
             shared: {
                 overwrite: true,
@@ -35,6 +36,12 @@ module.exports = shipit => {
         shipit.config.deployTo,
         'shared',
         'ecosystem.config.js'
+    );
+
+    const dotenvFilePath = path.join(
+        shipit.config.deployTo,
+        'shared',
+        '.env'
     );
 
     shipit.on('updated', async () => {
@@ -71,6 +78,8 @@ apps: [
         });
 
         await shipit.copyToRemote('ecosystem.config.js', ecosystemFilePath);
+        await shipit.copyToRemote('.env.prod', dotenvFilePath);
+        await shipit.remote(`ln -s ${dotenvFilePath} ${shipit.releasePath}/.env`)
     });
 
     shipit.blTask('yarn-install', async () => {

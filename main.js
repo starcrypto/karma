@@ -240,6 +240,7 @@ webhooks.on([
         return
     }
 
+    const recipientAddress = contributor.addresses.polygon;
     const response = await fetch(payload.pull_request.diff_url);
     const diffText = await response.text();
     const diffs = parseDiff(diffText);
@@ -247,7 +248,7 @@ webhooks.on([
 
     const karma = calculateKarma(payload.pull_request, diffs)
     const amount = web3.utils.toWei(karma.toString());
-    const rawTransaction = await signTransaction(tokenContract, privateKey, contributor.addresses.polygon, amount);
+    const rawTransaction = await signTransaction(tokenContract, privateKey, recipientAddress, amount);
     sendTransaction(rawTransaction, (txHash) => {
         const comment = `Hi @${userLogin},
         

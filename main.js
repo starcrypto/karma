@@ -162,7 +162,7 @@ webhooks.onAny(({id, name, payload}) => {
 webhooks.on([
     "issue_comment.created",
     "issue_comment.edited",
-], ({id, name, payload}) => {
+], async ({id, name, payload}) => {
 
     const issueNumber = payload.issue.number;
     const issueOwner = payload.issue.user.login;

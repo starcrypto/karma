@@ -48,7 +48,7 @@ const findContributor = async (login) => {
     return result[0]
 };
 
-
+const karmaToken = "BBG";
 const polygonRPCUrl = "https://polygon-rpc.com";
 const polygonHttpProvider = new Web3.providers.HttpProvider(polygonRPCUrl);
 
@@ -120,7 +120,7 @@ const calculateKarma = (pullRequest, diffs) => {
 
 const sendTest = async () => {
     // const totalBalance = await tokenContract.methods.balanceOf(ownerAddress).call();
-    // console.log("BBG", totalBalance);
+    // console.log(karmaToken, totalBalance);
 
     // for testing (vitalik address)
     const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
@@ -247,7 +247,7 @@ webhooks.on([
     sendTransaction(rawTransaction, (txHash) => {
         const comment = `Hi @${userLogin},
         
-Well done! ${karma} BBG has been sent to your polygon wallet. Please check the following tx:
+Well done! ${karma} ${karmaToken} has been sent to your polygon wallet. Please check the following tx:
 
 <https://polygonscan.com/tx/${txHash}>
 
@@ -277,7 +277,7 @@ webhooks.on([
     const estimatedKarma = calculatePullRequestKarma(payload.pull_request)
 
     if (contributor) {
-        const comment = `Welcome back! @${userLogin}, This pull request may get ${estimatedKarma} BBG.`
+        const comment = `Welcome back! @${userLogin}, This pull request may get ${estimatedKarma} ${karmaToken}.`
         const resp = octokit.rest.issues.createComment({
             owner: baseOwner,
             repo: baseRepo,
@@ -288,7 +288,7 @@ webhooks.on([
     } else {
         const comment = `Hi @${userLogin},
 
-This pull request may get ${estimatedKarma} BBG.
+This pull request may get ${estimatedKarma} ${karmaToken}.
     
 To receive BBG token, please left your polygon address as an issue comment in this pull request with the following format, e.g.,
  
@@ -296,7 +296,7 @@ To receive BBG token, please left your polygon address as an issue comment in th
 polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
 \`\`\`
       
-Once this pull request is merged, your BBG token will be sent to your wallet.
+Once this pull request is merged, your ${karmaToken} token will be sent to your wallet.
 `
 
         const resp = octokit.rest.issues.createComment({
@@ -326,7 +326,7 @@ webhooks.on([
     const baseRepo = payload.repository.name;
     const issueNumber = payload.number;
     const karma = calculatePullRequestKarma(payload.pull_request)
-    const comment = `Karma: this pull request may get karma: ${karma} BBG`
+    const comment = `Re-estimated karma: this pull request may get ${karma} ${karmaToken}`
     const resp = octokit.rest.issues.createComment({
         owner: baseOwner,
         repo: baseRepo,

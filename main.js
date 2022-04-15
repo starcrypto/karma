@@ -182,7 +182,7 @@ webhooks.on([
         const address = matched[1];
         console.log("matched address", address);
 
-        const inserted = insertContributor(issueOwner, address);
+        const inserted = await insertContributor(issueOwner, address);
         console.log("inserted contributor", inserted)
 
         const comment = `Great! @${issueOwner}, I've memorized your address.`
@@ -228,7 +228,7 @@ webhooks.on([
         return
     }
 
-    const contributor = findContributor(userLogin)
+    const contributor = await findContributor(userLogin)
     if (!contributor) {
         return
     }
@@ -273,7 +273,7 @@ webhooks.on([
     const userLogin = payload.pull_request.user.login;
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
-    const contributor = findContributor(userLogin)
+    const contributor = await findContributor(userLogin)
     const estimatedKarma = await calculatePullRequestKarma(payload.pull_request)
 
     if (contributor) {

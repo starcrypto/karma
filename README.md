@@ -31,6 +31,16 @@ DEPLOY_HOME=/home/karma
 # DEV_PROXY=https://smee.io/sTg2t0azYc123123123123%
 ```
 
+### Local Testing
+
+You can receive webhooks on your local machine or even browser using [EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) and [smee.io](https://smee.io/).
+
+Go to [smee.io](https://smee.io/) and <kbd>Start a new channel</kbd>. Then copy the "Webhook Proxy URL" and
+
+1. enter it in the GitHub App’s "Webhook URL" input
+2. set it to the DEV_PROXY environment variable
+
+
 ## Deploy
 
 ```shell

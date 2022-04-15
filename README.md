@@ -9,6 +9,9 @@ BBGO Karma Bot - BBG token distribution automation
 
 ## Setup
 
+Note that while setting a secret is optional on GitHub, it is required to be set in order to use `@octokit/webhooks`. Content Type must be set to `application/json`, `application/x-www-form-urlencoded` is not supported.
+
+
 ### dotenv
 
 ```
@@ -39,6 +42,7 @@ Go to [smee.io](https://smee.io/) and <kbd>Start a new channel</kbd>. Then copy 
 
 1. enter it in the GitHub App’s "Webhook URL" input
 2. set it to the DEV_PROXY environment variable
+
 
 
 ## Deploy

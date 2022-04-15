@@ -235,15 +235,19 @@ webhooks.on([
 
     console.log("found contributor", contributor)
 
+    if (!contributor.addresses || !contributor.addresses.polygon) {
+        console.log("address not found")
+        return
+    }
+
     const response = await fetch(payload.pull_request.diff_url);
     const diffText = await response.text();
     const diffs = parseDiff(diffText);
     console.log(diffs);
 
     const karma = calculateKarma(payload.pull_request, diffs)
-    const recipientAddress = "0xc1e42f862d202b4a0ed552c1145735ee088f6ccf";
     const amount = web3.utils.toWei(karma.toString());
-    const rawTransaction = await signTransaction(tokenContract, privateKey, recipientAddress, amount);
+    const rawTransaction = await signTransaction(tokenContract, privateKey, contributor.addresses.polygon, amount);
     sendTransaction(rawTransaction, (txHash) => {
         const comment = `Hi @${userLogin},
         

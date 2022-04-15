@@ -267,14 +267,14 @@ Thank you for your contribution!
 
 webhooks.on([
     "pull_request.opened"
-], ({id, name, payload}) => {
+], async ({id, name, payload}) => {
     const issueNumber = payload.number;
 
     const userLogin = payload.pull_request.user.login;
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
     const contributor = findContributor(userLogin)
-    const estimatedKarma = calculatePullRequestKarma(payload.pull_request)
+    const estimatedKarma = await calculatePullRequestKarma(payload.pull_request)
 
     if (contributor) {
         const comment = `Welcome back! @${userLogin}, This pull request may get ${estimatedKarma} ${karmaToken}.`
@@ -325,7 +325,7 @@ webhooks.on([
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
     const issueNumber = payload.number;
-    const karma = calculatePullRequestKarma(payload.pull_request)
+    const karma = await calculatePullRequestKarma(payload.pull_request)
     const comment = `Re-estimated karma: this pull request may get ${karma} ${karmaToken}`
     const resp = octokit.rest.issues.createComment({
         owner: baseOwner,

@@ -274,9 +274,10 @@ webhooks.on([
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
     const contributor = findContributor(userLogin)
+    const estimatedKarma = calculatePullRequestKarma(payload.pull_request)
 
     if (contributor) {
-        const comment = `Welcome back! @${userLogin}`
+        const comment = `Welcome back! @${userLogin}, This pull request may get ${estimatedKarma} BBG.`
         const resp = octokit.rest.issues.createComment({
             owner: baseOwner,
             repo: baseRepo,
@@ -286,6 +287,8 @@ webhooks.on([
         console.log(resp);
     } else {
         const comment = `Hi @${userLogin},
+
+This pull request may get ${estimatedKarma} BBG.
     
 To receive BBG token, please left your polygon address as an issue comment in this pull request with the following format, e.g.,
  
@@ -307,24 +310,22 @@ Once this pull request is merged, your BBG token will be sent to your wallet.
 
 })
 
+const calculatePullRequestKarma = async (pullRequest) => {
+    const diffUrl = pullRequest.diff_url;
+    const response = await fetch(diffUrl);
+    const diffText = await response.text();
+    const diffs = parseDiff(diffText);
+    return calculateKarma(pullRequest, diffs)
+}
+
 webhooks.on([
-    "pull_request.opened",
     "pull_request.reopened",
     "pull_request.synchronize"
 ], async ({id, name, payload}) => {
     const baseOwner = payload.repository.owner.login;
     const baseRepo = payload.repository.name;
-
-    const userLogin = payload.pull_request.user.login;
-    const diffUrl = payload.pull_request.diff_url;
     const issueNumber = payload.number;
-    const state = payload.pull_request.state;
-
-    const response = await fetch(diffUrl);
-    const diffText = await response.text();
-    const diffs = parseDiff(diffText);
-
-    const karma = calculateKarma(payload.pull_request, diffs)
+    const karma = calculatePullRequestKarma(payload.pull_request)
     const comment = `Karma: this pull request may get karma: ${karma} BBG`
     const resp = octokit.rest.issues.createComment({
         owner: baseOwner,

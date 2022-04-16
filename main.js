@@ -191,38 +191,21 @@ webhooks.on([
 
     // check the address format
     const matched = polygonAddressRE.exec(payload.comment.body)
-    if (matched) {
-        const address = matched[1];
-        console.log("matched address", address);
+    if (!matched) {
+        return
+    }
+    
+    const address = matched[1];
+    console.log("matched address", address);
 
-        if (!ethAddressRE.exec(address)) {
-            const comment = `Hi @${issueOwner},
+    if (!ethAddressRE.exec(address)) {
+        const comment = `Hi @${issueOwner},
     
 You left an invalid address format, please write your address with the following format:
  
     polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
       
 `
-            const resp = octokit.rest.issues.createComment({
-                owner: payload.repository.owner.login,
-                repo: payload.repository.name,
-                issue_number: issueNumber,
-                body: comment,
-            });
-            console.log(resp);
-            return;
-        }
-
-        const contributor = await findContributor(issueOwner)
-        if (!contributor) {
-            const inserted = await insertContributor(issueOwner, address);
-            console.log("inserted contributor", inserted)
-        } else {
-            const updated = await updateContributorAddress(issueOwner, address)
-            console.log("updated contributor", updated)
-        }
-
-        const comment = `Great! @${issueOwner}, I've memorized your address.`
         const resp = octokit.rest.issues.createComment({
             owner: payload.repository.owner.login,
             repo: payload.repository.name,
@@ -230,7 +213,26 @@ You left an invalid address format, please write your address with the following
             body: comment,
         });
         console.log(resp);
+        return;
     }
+
+    const contributor = await findContributor(issueOwner)
+    if (!contributor) {
+        const inserted = await insertContributor(issueOwner, address);
+        console.log("inserted contributor", inserted)
+    } else {
+        const updated = await updateContributorAddress(issueOwner, address)
+        console.log("updated contributor", updated)
+    }
+
+    const comment = `Great! @${issueOwner}, I've memorized your address.`
+    const resp = octokit.rest.issues.createComment({
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        issue_number: issueNumber,
+        body: comment,
+    });
+    console.log(resp);
 })
 
 webhooks.on([

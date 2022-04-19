@@ -194,11 +194,14 @@ webhooks.on([
     if (!matched) {
         return
     }
-    
+
     const address = matched[1];
+    console.log("body:", payload.comment.body);
     console.log("matched address", address);
 
     if (!ethAddressRE.exec(address)) {
+        console.log("eth address unmatched: ", address)
+
         const comment = `Hi @${issueOwner},
     
 You left an invalid address format, please write your address with the following format:

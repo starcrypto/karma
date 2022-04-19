@@ -116,10 +116,12 @@ const sendTransaction = (rawTransaction, txHashHandler) => {
         });
 }
 
-const baseKarma = 100;
-const lineKarma = 1;
+const baseKarma = 200;
+const lineKarma = 3;
 const chunkKarma = 2;
-const reviewKarma = 100;
+const reviewKarma = 200;
+
+const codeFileTypes = /\.(js|jsx|ts|tsx|go|c|cpp|cxx|h|sql)$/;
 
 const calculateKarma = (pullRequest, diffs) => {
     let karma = baseKarma;

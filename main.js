@@ -183,7 +183,7 @@ webhooks.on([
     const issueNumber = payload.issue.number;
     const issueOwner = payload.issue.user.login;
     const commentOwner = payload.comment.user.login;
-    if (issueOwner != commentOwner) {
+    if (issueOwner !== commentOwner) {
         return
     }
 
@@ -192,8 +192,10 @@ webhooks.on([
         return
     }
 
+    const comment = payload.comment.body;
+
     // check the address format
-    const matched = polygonAddressRE.exec(payload.comment.body)
+    const matched = polygonAddressRE.exec(comment)
     if (!matched) {
         return
     }
@@ -202,7 +204,7 @@ webhooks.on([
     console.log("body:", payload.comment.body);
     console.log("matched address", address);
 
-    if (!ethAddressRE.exec(address)) {
+    if (!ethAddressRE.test(address)) {
         console.log("eth address unmatched: ", address)
 
         const comment = `Hi @${issueOwner},
@@ -210,7 +212,8 @@ webhooks.on([
 You left an invalid address format, please write your address with the following format:
  
     polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
-      
+    
+    
 `
         const resp = octokit.rest.issues.createComment({
             owner: payload.repository.owner.login,
@@ -231,12 +234,12 @@ You left an invalid address format, please write your address with the following
         console.log("updated contributor", updated)
     }
 
-    const comment = `Great! @${issueOwner}, I've memorized your address.`
+    const newComment = `Great! @${issueOwner}, I've memorized your address.`
     const resp = octokit.rest.issues.createComment({
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
         issue_number: issueNumber,
-        body: comment,
+        body: newComment,
     });
     console.log(resp);
 })

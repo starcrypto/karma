@@ -1,11 +1,12 @@
 FROM node:18
 
 WORKDIR /app
-COPY . .
+COPY package.* .
 RUN yarn install
+COPY . .
 
 EXPOSE 3301
 
 
-ENTRYPOINT "node"
+ENTRYPOINT ["node"]
 CMD ["main.js"]

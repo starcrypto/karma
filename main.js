@@ -197,6 +197,7 @@ webhooks.on([
     // check the address format
     const matched = polygonAddressRE.exec(comment)
     if (!matched) {
+        console.log("comment format unmatched")
         return
     }
 

@@ -328,18 +328,21 @@ webhooks.on([
     } else {
         const comment = `Hi @${userLogin},
 
+This is KarmaBot, and we reward your contributions with tokens sent directly to your wallet to support development.
+
 This pull request may get ${estimatedKarma} ${karmaToken}.
     
-To receive BBG token, please left your polygon address as an issue comment in this pull request with the following format, e.g.,
+To receive BBG tokens, please provide your Polygon (can be Ethereum) address as an issue comment in this pull request, following this format:
  
 \`\`\`
 polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
 \`\`\`
       
-Once this pull request is merged, your ${karmaToken} token will be sent to your wallet.
+Once this pull request is merged, your ${karmaToken} tokens will be transferred to your wallet.
 
 --
-If you're interested in this project, you may join our telegram group, visit <https://t.me/bbgo_intl>.
+If you're interested in our project, feel free to join our Telegram group <https://t.me/bbgo_intl>
+
 
 Best,
 KarmaBot

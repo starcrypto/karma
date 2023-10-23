@@ -192,7 +192,7 @@ webhooks.on([
         return
     }
 
-    const comment = payload.comment.body;
+    const comment = payload.comment.body.trim();
 
     // check the address format
     const matched = polygonAddressRE.exec(comment)
@@ -201,12 +201,14 @@ webhooks.on([
         return
     }
 
-    const address = matched[1];
     console.log("body:", payload.comment.body);
+
+    const address = matched[1].trim();
+
     console.log("matched address", address);
 
     if (!ethAddressRE.test(address)) {
-        console.log("eth address unmatched: ", address)
+        console.log("eth address pattern unmatched:", address)
 
         const comment = `Hi @${issueOwner},
     
@@ -225,6 +227,8 @@ You left an invalid address format, please write your address with the following
         console.log(resp);
         return;
     }
+
+    console.log("valid eth address:", address)
 
     const contributor = await findContributor(issueOwner)
     if (!contributor) {

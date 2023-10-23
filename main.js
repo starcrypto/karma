@@ -337,6 +337,12 @@ polygon:0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B
 \`\`\`
       
 Once this pull request is merged, your ${karmaToken} token will be sent to your wallet.
+
+--
+If you're interested in this project, you may join our telegram group, visit <https://t.me/bbgo_intl>.
+
+Best,
+KarmaBot
 `
 
         const resp = octokit.rest.issues.createComment({
